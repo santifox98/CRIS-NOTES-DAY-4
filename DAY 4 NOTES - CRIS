@@ -1,0 +1,490 @@
+
+I
+
+
+
+https://github.com/rivancorp/vrf_vpn_rt_mpls
+
+
+
+
+configure terminal
+ hostname R4-PEa
+ enable secret pass
+ no ip domain-lookup
+ logging console
+ alias exec bp show ip int brief | ex una
+ alias exec sr show ip route
+ alias exec sp show ip protocols
+ ip subnet-zero
+ int lo 0
+   ip address 172.16.1.4 255.255.255.255
+end
+
+
+
+ALABANG
+
+config txl
+ ip vrf clientMBa
+   rd 999:1
+   route-target 64999:1
+ ip vrf clientEWBa
+   rd 999:2
+   route-target 64999:2
+ ip vrf clientCBa
+   rd 999:3
+   route-target 64999:3 
+   exit
+
+
+
+
+STATIC ROUTE
+EIGRP
+OSPF
+BGP
+
+
+
+
+
+clear ip bgp * soft
+
+
+
+How to make a Route MAP: 
+
+AMS
+
+
+
+ACCESS LIST
+MATCH
+SET
+
+
+config t
+
+
+
+access-list 45 permit host 45.45.45.45
+access-list 46 permit host 46.46.46.46
+access-list 47 permit host 47.47.47.47
+route-map LP1 permit 10
+ match ip address 45
+  set local-pref 415
+route-map LP1 permit 20
+ match ip address 46
+  set local-pref 416
+route-map LP1 Deny 30
+ match ip address 47
+route-map LP1 Permit 40
+		router bgp 45
+			neighbor 45.4.5.5 route-map LP1 out
+			do clear ip bgp *
+
+
+
+
+
+conf t
+router bgp 45
+no neighbor 209.9.9.1 route-map ASPHATH3 out
+do clear ip bgp *
+
+
+
+
+
+
+config t
+access-list 51 permit host 51.51.51.51
+access-list 52 permit host 52.52.52.52
+access-list 53 permit host 53.53.53.53
+access-list 54 permit host 54.54.54.54
+route-map LP2 permit 10
+ match ip address 51
+  set local-pref 51
+route-map LP1 permit 20
+ match ip address 52
+  set local-pref 52
+route-map LP1 Deny 30
+ match ip address 53 54
+route-map LP1 Permit 40
+		router bgp 45
+			neighbor 45.4.5.5 route-map LP1 out
+			do clear ip bgp *
+end
+
+
+
+BGP Practice LAB #4: 
+
+
+config t
+		route-map ASPATH3 permit 10
+			set as-path prepend 3 3 3
+			exit
+		router bgp 3
+			neighbor 209.9.9.1 route-map ASPATH3 OUT
+			do clear ip bgp * soft
+			end
+end
+
+
+
+
+config t
+		route-map ASPATH2 permit 10
+			set as-path prepend 2 2 2 2 2 2 2 2
+			exit
+		router bgp 2
+			neighbor 207.7.7.1 route-map ASPATH2 OUT
+			do clear ip bgp * soft
+			end
+end
+
+
+
+
+
+
+***********************
+
+BRING TO NORMAL
+
+
+
+conf t
+router bgp 45
+no neighbor 209.9.9.1 route-map ASPHATH3 out
+do clear ip bgp *
+
+conf t
+router bgp 45
+no neighbor 208.8.8.1 route-map ASPHATH5 out
+do clear ip bgp * soft
+
+
+
+
+
+
+BGP Practice LAB #7: 
+
+
+
+config t
+access-list 42 permit host 42.42.42.42
+access-list 44 permit host 44.44.44.44
+route-map LP1 permit 10
+match ip address 42 44
+set as-path prepend 45 45 45 
+route-map ASPATH5 permit 20
+router bgp 45
+neighbor 208.8.8.4 route-map ASPATH5 out
+do clear ip bgp *
+end
+
+
+
+ match ip address 46
+  set local-pref 416
+route-map LP1 Deny 30
+ match ip address 47
+route-map LP1 Permit 40
+		router bgp 45
+			neighbor 45.4.5.5 route-map LP1 out
+			do clear ip bgp *
+
+
+
+STEP 2: CONNECT AND CONFIGURE DITO AND PLDT:
+
+
+conf t
+int fa 0/2/0
+description PLDTbluewire
+ip add 200.0.0.31 255.255.255.0
+no shut
+int fa 0/2/1
+description DITOblackwirePRIMARY
+ip add 200.0.0.31 255.255.255.0
+no shut
+
+
+
+
+
+
+
+
+conf t
+int fa 0/2/0
+description PLDTbluewire
+ip add 201.0.0.31 255.255.255.0
+no shut
+int fa 0/2/1
+description DITOblackwirePRIMARY
+ip add 201.0.0.31 255.255.255.0
+no shut
+
+
+
+
+
+STEP 3: CCNP needs to know how to create FLOATING static route
+
+
+
+conf t
+ip route 0.0.0.0 0.0.0.0 201.0.0.1 2
+ip route 0.0.0.0 0.0.0.0 200.0.0.1 2
+do sh ip route static
+
+
+
+
+STEP 4: Create DHCP for IP Phones
+
+
+
+CUCM:
+
+
+
+config t
+ip dhcp excluded-add 10.31.100.1 10.31.100.150
+ip dhcp pool VLAN100
+network 10.31.100.0 255.255.255.0
+default-router 10.31.100.1
+option 150 ip 10.31.100.1 
+int range fas 0/1/2-3
+swi mode acc
+swi acc vlan 100
+end
+
+
+
+STEP5: BASIC TELEPHONY CONFIGS: 
+
+
+config t
+
+
+
+
+
+
+STE 5: ROUTE TO CLASSMATE
+
+
+
+config t
+router eigrp 100 
+no auto-summary
+network 200.0.0.0
+network 10.0.0.0
+int vlan 50
+ip add 10.31.50.3 255.255.255.0
+int range Fas 0/1/0-1
+swi mode acc
+swi acc vlan 50
+end
+
+
+
+
+
+
+
+config t
+int fa 0/0
+ip nbar protocol-discovery
+end
+
+
+
+
+config t
+ip flow-export source fa 0/1/7
+ip flow-export version 5
+ip flow-export destination 10.31.1.10 2055
+interface fa 0/1/7
+snmp-server community public
+end
+
+
+@ENABLE SSH
+
+conf t
+ip domain-name rivanit.com
+username admin privilege 15 secret pass
+ip ssh version 2
+crypto key generate rsa
+---> 2048
+
+
+line vty 0 15
+login local
+transport input telnet ssh
+
+
+
+
+C1sc0123
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
